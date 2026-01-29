@@ -11,24 +11,19 @@ def generate_forecast():
     print(f"Стартовая цена (январь 2026): ${last_price:.2f}")
 
     # Создаем временную шкалу до 2035 года (помесячно)
-    future_dates = pd.date_range(start=last_date, periods=120, freq='ME')
+    future_dates = pd.date_range(start=last_date, periods=121, freq='ME') # 121 чтобы захватить полный период
 
-    # Бизнес-логика из ТЗ: Золото > $5000 и системная переоценка
-    # Мы заложим среднегодовой рост (CAGR) в 3 сценариях
     scenarios = {
-        "Optimistic (Hyperinflation)": 0.12, # +12% в год
-        "Base (Structural Shift)": 0.05,     # +5% в год
-        "Pessimistic (Correction)": -0.02    # -2% в год
+        "Optimistic (Hyperinflation)": 0.12,
+        "Base (Structural Shift)": 0.05,
+        "Pessimistic (Correction)": -0.02
     }
 
     forecast_df = pd.DataFrame(index=future_dates)
 
     for name, growth in scenarios.items():
-        # Формула сложных процентов: Price * (1 + r)^(t/12)
+        # Формула: Price * (1 + r)^(t/12)
         forecast_df[name] = [last_price * (1 + growth)**(i/12) for i in range(len(future_dates))]
-
-    # Сохраняем для отчета (Excel/CSV - требование олимпиады)
-    forecast_df.to_csv("data/final_forecast_2035.csv")
 
     # Визуализация
     plt.figure(figsize=(12, 6))
@@ -47,5 +42,22 @@ def generate_forecast():
     print(f"3 года (2029): ${forecast_df['Base (Structural Shift)'].iloc[36]:.2f}")
     print(f"5 лет (2031): ${forecast_df['Base (Structural Shift)'].iloc[60]:.2f}")
 
+    return forecast_df # ВАЖНО: возвращаем DataFrame для следующей функции
+
+def export_to_excel(forecast_df):
+    # Добавляем интервалы уверенности (статистическая чистка по ТЗ)
+    forecast_df['Lower_Bound'] = forecast_df['Base (Structural Shift)'] * 0.85
+    forecast_df['Upper_Bound'] = forecast_df['Base (Structural Shift)'] * 1.15
+
+    forecast_df.index.name = 'Date'
+
+    # Сохраняем результат
+    file_path = "data/alliance_altyn_forecast_2026_2035.csv"
+    forecast_df.to_csv(file_path)
+    print(f"\n--- ФИНАЛ ---")
+    print(f"Финальная таблица создана: {file_path}")
+
 if __name__ == "__main__":
-    generate_forecast()
+    # Запускаем цепочку
+    result_df = generate_forecast()
+    export_to_excel(result_df)
