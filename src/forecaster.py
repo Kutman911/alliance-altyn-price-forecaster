@@ -45,17 +45,58 @@ def generate_forecast():
     return forecast_df # ВАЖНО: возвращаем DataFrame для следующей функции
 
 def export_to_excel(forecast_df):
-    # Добавляем интервалы уверенности (статистическая чистка по ТЗ)
+    # Путь к файлу
+    file_path_xlsx = "data/alliance_altyn_forecast_2026_2035.xlsx"
+
+    # 1. Подготовка данных (статистическая чистка)
     forecast_df['Lower_Bound'] = forecast_df['Base (Structural Shift)'] * 0.85
     forecast_df['Upper_Bound'] = forecast_df['Base (Structural Shift)'] * 1.15
+    forecast_df.index = forecast_df.index.date # Убираем время, оставляем только дату
 
-    forecast_df.index.name = 'Date'
+    # 2. Создаем Excel writer с движком xlsxwriter
+    writer = pd.ExcelWriter(file_path_xlsx, engine='xlsxwriter')
+    forecast_df.to_excel(writer, sheet_name='Price Forecast')
 
-    # Сохраняем результат
-    file_path = "data/alliance_altyn_forecast_2026_2035.csv"
-    forecast_df.to_csv(file_path)
+    workbook  = writer.book
+    worksheet = writer.sheets['Price Forecast']
+
+    # 3. Наводим красоту: Форматы
+    header_format = workbook.add_format({'bold': True, 'bg_color': '#FAA83C', 'color': 'white', 'border': 1})
+    money_format = workbook.add_format({'num_format': '$#,##0.00'})
+    date_format = workbook.add_format({'num_format': 'mmm yyyy'})
+
+    # Применяем форматы к колонкам
+    worksheet.set_column('A:A', 15, date_format) # Дата
+    worksheet.set_column('B:F', 18, money_format) # Цены
+
+    # 4. Условное форматирование (Цветовая шкала для цен)
+    worksheet.conditional_format('B2:B122', {
+        'type': '2_color_scale',
+        'min_color': "#FFFAA0",
+        'max_color': "#FAA83C"
+    })
+
+    # 5. Добавляем график прямо в Excel
+    chart = workbook.add_chart({'type': 'line'})
+
+    # Добавляем серии данных на график
+    for i in range(1, 4): # Сценарии: Opt, Base, Pess
+        chart.add_series({
+            'name':       ['Price Forecast', 0, i],
+            'categories': ['Price Forecast', 1, 0, 121, 0],
+            'values':     ['Price Forecast', 1, i, 121, i],
+        })
+
+    chart.set_title({'name': 'Прогноз цен XAU/USD (2026-2035)'})
+    chart.set_x_axis({'name': 'Дата'})
+    chart.set_y_axis({'name': 'Цена ($)'})
+
+    # Вставляем график рядом с таблицей
+    worksheet.insert_chart('H2', chart)
+
+    writer.close()
     print(f"\n--- ФИНАЛ ---")
-    print(f"Финальная таблица создана: {file_path}")
+    print(f"Красивый Excel файл создан: {file_path_xlsx}")
 
 if __name__ == "__main__":
     # Запускаем цепочку
