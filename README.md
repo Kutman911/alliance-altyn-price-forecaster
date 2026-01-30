@@ -1,7 +1,7 @@
 # Alliance Altyn Price Forecaster (2026-2035)
 ## 📑 Презентация проекта
 Проект сопровожден интерактивной презентацией в Canva:
-👉 [Смотреть презентацию (Canva)]([ТВОЯ_ССЫЛКА_ЗДЕСЬ](https://www.canva.com/design/DAG_1DAOgqc/hdQ5Q7TArja6umdE1o8gnw/edit?utm_content=DAG_1DAOgqc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton))
+👉 [Смотреть презентацию (Canva)](https://www.canva.com/design/DAG_1DAOgqc/hdQ5Q7TArja6umdE1o8gnw/edit?utm_content=DAG_1DAOgqc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 Аналитическая система прогнозирования цен на драгоценные металлы, разработанная для олимпиады FinOlimp 2026.
 
 ## 📌 Описание
